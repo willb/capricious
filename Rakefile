@@ -6,7 +6,7 @@ begin
   Jeweler::Tasks.new do |gem|
     gem.name = "capricious"
     gem.summary = %Q{Pseudorandom number generator classes and support code}
-    gem.description = %Q{TODO: longer description of your gem}
+    gem.description = %Q{Pseudorandom number generator classes and support code, parameterized on a source of randomness and a probability distribution}
     gem.email = "willb@redhat.com"
     gem.homepage = "http://github.com/willb/capricious"
     gem.authors = ["Will Benton"]
