@@ -17,59 +17,90 @@
 # limitations under the License.
 
 module Capricious
+  # Linear-feedback shift register class
   class LFSR
   
+    def LFSR.new_with_seed(seed)
+      LFSR.new(nil, seed)
+    end
+    
     # initializes
     def initialize(size=nil, seed=nil)
       size = size || (0.size * 8)
       case size
       when 64
         @ns = SixtyFourBitShifter
+        class << self ; include SixtyFourBitShifter ; private :shift_reg ; end
       when 32
         @ns = ThirtyTwoBitShifter
+        class << self ; include ThirtyTwoBitShifter ; private :shift_reg ; end
       when 16
         @ns = SixteenBitShifter
+        class << self ; include SixteenBitShifter ; private :shift_reg ; end
       else
         @ns = ThirtyTwoBitShifter
+        class << self ; include ThirtyTwoBitShifter ; private :shift_reg ; end
       end
       
-      reset(seed)
+      reset
     end
 
     def next
       shift_reg
       @reg
     end
-    
+
+    def next_f
+      self.next
+      @reg.quo(@ns::MASK.to_f)
+    end
+
     def reset(seed=nil)
       @seed ||= (seed || Time.now.utc.to_i) & @ns::MASK
       @reg = @seed
     end
-    
-    private
-    def shift_reg
-      bit = @ns::BITS.inject(0) {|acc, bit| acc ^= @reg[@ns::SIZE-bit] ; acc }
-      @reg = (@reg >> 1) | (bit << @ns::SIZE-1)
-    end
-    
   end
 
   module SixtyFourBitShifter
     MASK = 0xffffffffffffffff
     SIZE = 64
     BITS = [64,63,61,60]
+    BITSELECT = BITS.map {|bit| "@reg[#{SIZE-bit}]"}.join("^")
+    
+    class_eval <<-SHIFT_REG
+    def shift_reg
+      bit = #{BITSELECT}
+      @reg = (@reg >> 1) | (bit << #{SIZE-1})
+    end
+    SHIFT_REG
   end 
   
   module ThirtyTwoBitShifter
     MASK = 0xffffffff
     SIZE = 32
-    BITS = [32,22,2,1]
+    BITS = [32,31,30,10]
+    BITSELECT = BITS.map {|bit| "@reg[#{SIZE-bit}]"}.join("^")
+    
+    class_eval <<-SHIFT_REG
+    def shift_reg
+      bit = #{BITSELECT}
+      @reg = (@reg >> 1) | (bit << #{SIZE-1})
+    end
+    SHIFT_REG
   end
 
   module SixteenBitShifter
     MASK = 0xffff
     SIZE = 16
     BITS = [16,14,13,11]
+    BITSELECT = BITS.map {|bit| "@reg[#{SIZE-bit}]"}.join("^")
+    
+    class_eval <<-SHIFT_REG
+    def shift_reg
+      bit = #{BITSELECT}
+      @reg = (@reg >> 1) | (bit << #{SIZE-1})
+    end
+    SHIFT_REG
   end
   
   nil
