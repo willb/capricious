@@ -1,4 +1,4 @@
-# capricious/uniform.rb:  uniform-distribution PRNG, with selectable source-randomness policy
+# capricious/generic_prng.rb:  generic PRNG mixin with selectable source-randomness
 #
 # Copyright (c) 2010 Red Hat, Inc.
 #
@@ -16,15 +16,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'capricious/generic_prng'
+require 'capricious/lfsr'
+require 'capricious/sample_sink'
 
 module Capricious
-  class Uniform
-    include PRNG
+  module PRNG
+    def initialize(seed=nil, policy=LFSR, keep_stats=false)
+      @prng = policy.new_with_seed(seed)
+      @seed = @prng.seed
+      @aggregate = SampleSink.new if keep_stats
+    end
     
-    private
-    def next_value
-      @prng.next_f
+    def next
+      val = next_value
+      @aggregate << val if @aggregate
+      val
+    end
+
+    def reset(seed=nil)
+      @prng.reset(seed)
+      @aggregate = SampleSink.new if @aggregate
+    end
+    
+    def self.included(base)
+      base.class_eval do
+        attr_reader :aggregate, :seed
+      end
     end
   end
 end
