@@ -1,4 +1,4 @@
-# capricious/prng.rb:  uniform random number generator class
+# capricious/lfsr.rb:  linear-feedback shift register class
 #
 # Copyright (c) 2010 Red Hat, Inc.
 #
@@ -17,10 +17,10 @@
 # limitations under the License.
 
 module Capricious
-  class PRNG
+  class LFSR
   
     # initializes
-    def initialize(seed=nil, size=nil)
+    def initialize(size=nil, seed=nil)
       size = size || (0.size * 8)
       case size
       when 64
@@ -44,12 +44,11 @@ module Capricious
     def reset(seed=nil)
       @seed ||= (seed || Time.now.utc.to_i) & @ns::MASK
       @reg = @seed
-      shift_reg
     end
     
     private
     def shift_reg
-      bit = @ns::BITS.inject(0) {|acc, bit| acc ^= @reg[@ns::SIZE-bit] ; acc } & 1
+      bit = @ns::BITS.inject(0) {|acc, bit| acc ^= @reg[@ns::SIZE-bit] ; acc }
       @reg = (@reg >> 1) | (bit << @ns::SIZE-1)
     end
     
@@ -70,7 +69,7 @@ module Capricious
   module SixteenBitShifter
     MASK = 0xffff
     SIZE = 16
-    BITS = [16,15,13,4]
+    BITS = [16,14,13,11]
   end
   
   nil
