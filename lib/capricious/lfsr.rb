@@ -19,7 +19,9 @@
 module Capricious
   # Linear-feedback shift register class
   class LFSR
-  
+
+    attr_reader :seed
+
     def LFSR.new_with_seed(seed)
       LFSR.new(nil, seed)
     end

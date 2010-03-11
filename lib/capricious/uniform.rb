@@ -21,10 +21,11 @@ require 'capricious/sample_sink'
 
 module Capricious
   class Uniform
-    attr_reader :aggregate
+    attr_reader :aggregate, :seed
     
     def initialize(seed=nil, policy=LFSR, keep_stats=false)
       @prng = policy.new_with_seed(seed)
+      @seed = @prng.seed
       @aggregate = SampleSink.new if keep_stats
     end
     
