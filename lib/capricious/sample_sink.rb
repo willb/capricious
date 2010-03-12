@@ -19,13 +19,13 @@
 module Capricious
   class SampleSink
     
-    attr_reader :min, :max, :count, :mean
+    attr_reader :min, :max, :count, :mean, :variance
     
     def initialize
       @min = nil
       @max = nil
       @count = 0
-      @var = 0.0
+      @variance = 0.0
       @mean = 0.0
       @sum_x2 = 0.0
     end
@@ -42,7 +42,7 @@ module Capricious
     end
     
     def stddev
-      Math::sqrt(@var)
+      Math::sqrt(@variance)
     end
     
     private
@@ -56,7 +56,7 @@ module Capricious
       dev = sample - @mean
       @mean += (dev / @count)
       @sum_x2 += (dev * (sample - @mean))
-      @var = @sum_x2 / @count
+      @variance = @sum_x2 / @count
     end
   end
 end

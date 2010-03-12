@@ -1,4 +1,4 @@
-# capricious:  random number generators for Ruby
+# capricious/poisson.rb:  Poisson-distribution PRNG, with selectable source-randomness policy
 #
 # Copyright (c) 2010 Red Hat, Inc.
 #
@@ -16,7 +16,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'capricious/lfsr'
-require 'capricious/sample_sink'
-require 'capricious/uniform'
-require 'capricious/poisson'
+require 'capricious/generic_prng'
+
+module Capricious
+  class Poisson
+    include PRNG
+    
+    alias prng_initialize initialize
+    attr_reader :z
+    
+    def initialize(l, seed=nil, policy=LFSR, keep_stats=false)
+      @z = Math.exp(-l)
+      prng_initialize(seed, policy, keep_stats)
+    end
+    
+    private
+    # Algorithm 369, CACM, January 1970
+    def next_value
+      k = 0
+
+      t = @prng.next_f
+      while t > self.z
+        k = k + 1
+        t = t * @prng.next_f
+      end
+      
+      k
+    end
+  end
+end

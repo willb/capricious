@@ -47,13 +47,13 @@ module Capricious
       reset
     end
 
-    def next
+    def next_i
       shift_reg
       @reg
     end
 
     def next_f
-      self.next
+      next_i
       @reg.quo(@ns::MASK.to_f)
     end
 
@@ -66,7 +66,8 @@ module Capricious
   module SixtyFourBitShifter
     MASK = 0xffffffffffffffff
     SIZE = 64
-    BITS = [64,63,61,60]
+#    BITS = [64,63,61,60]
+    BITS = [64,4,3,1]
     BITSELECT = BITS.map {|bit| "@reg[#{SIZE-bit}]"}.join("^")
     
     class_eval <<-SHIFT_REG
