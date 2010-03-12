@@ -17,11 +17,17 @@
 # limitations under the License.
 
 require 'capricious/lfsr'
+require 'capricious/mwc5'
 require 'capricious/sample_sink'
 
 module Capricious
   module PRNG
-    def initialize(seed=nil, policy=LFSR, keep_stats=false)
+    
+    def initialize(seed=nil, policy=MWC5, keep_stats=false)
+      prng_initialize(seed, policy, keep_stats)
+    end
+    
+    def prng_initialize(seed=nil, policy=MWC5, keep_stats=false)
       @prng = policy.new_with_seed(seed)
       @seed = @prng.seed
       @aggregate = SampleSink.new if keep_stats

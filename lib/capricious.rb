@@ -17,6 +17,7 @@
 # limitations under the License.
 
 require 'capricious/lfsr'
+require 'capricious/mwc5'
 require 'capricious/sample_sink'
 require 'capricious/uniform'
 require 'capricious/poisson'

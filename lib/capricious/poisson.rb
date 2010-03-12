@@ -22,10 +22,9 @@ module Capricious
   class Poisson
     include PRNG
     
-    alias prng_initialize initialize
     attr_reader :z
     
-    def initialize(l, seed=nil, policy=LFSR, keep_stats=false)
+    def initialize(l, seed=nil, policy=MWC5, keep_stats=false)
       @z = Math.exp(-l)
       prng_initialize(seed, policy, keep_stats)
     end
