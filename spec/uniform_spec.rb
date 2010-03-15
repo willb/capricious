@@ -1,8 +1,6 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 module Capricious
-  EXPECTED_MEAN = 0.5
-  EXPECTED_STDDEV = 0.288675134594813
   SAMPLE_COUNT = 20000
 
   describe Uniform do
@@ -20,8 +18,8 @@ module Capricious
 
       it "should, given policy #{policy.name}, generate uniformly-distributed numbers in the range (0,1], as judged by mean and variance estimates" do
         generate_samples(policy)
-        @uniform.aggregate.mean.should be_close(EXPECTED_MEAN, 0.01)
-        @uniform.aggregate.stddev.should be_close(EXPECTED_STDDEV, 0.01)
+        @uniform.aggregate.mean.should be_close(@uniform.expected_mean, 0.01)
+        @uniform.aggregate.stddev.should be_close(Math.sqrt(@uniform.expected_variance), 0.01)
       end
     
       it "should, given policy #{policy.name}, generate the same sequence given the same seed" do

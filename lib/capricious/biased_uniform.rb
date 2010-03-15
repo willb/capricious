@@ -1,4 +1,4 @@
-# capricious/uniform.rb:  uniform-distribution PRNG, with selectable source-randomness policy
+# capricious/biased_uniform.rb:  biased uniform-distribution PRNG, with specifiable max and min and selectable source-randomness policy
 #
 # Copyright (c) 2010 Red Hat, Inc.
 #
@@ -16,33 +16,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'capricious/generic_prng'
+require 'capricious/uniform'
 
 module Capricious
-  class Uniform
-    include PRNG
-    UNIFORM_MIN = 0.0
-    UNIFORM_MAX = 1.0
-    
-    def expected_mean
-      (min + max) / 2
-    end
-    
-    def expected_variance
-      ((max - min) ** 2) / 12
+  class BiasedUniform < Uniform
+    def initialize(min=Uniform::UNIFORM_MIN, max=Uniform::UNIFORM_MAX, seed=nil, policy=MWC5, keep_stats=false)
+      @min = min
+      @max = max
+      prng_initialize(seed, policy, keep_stats)
     end
     
     private
-    def min
-      @min || UNIFORM_MIN
-    end
-    
-    def max
-      @max || UNIFORM_MAX
-    end
-    
     def next_value
-      @prng.next_f
+      (@prng.next_f * (max - min)) + min
     end
   end
 end
