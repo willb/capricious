@@ -1,4 +1,8 @@
-version 0.2.0
+version 0.2.1
+
+* 0.2.0 sneaked out the door with a stray debugging printf; this is a paper-bag release.
+
+version 0.2.0 (6cebdd8c2574be71b9f9575542903960b22aa568)
 
 * Improved documentation.
 * Added Erlang distribution.
