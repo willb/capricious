@@ -41,7 +41,7 @@ module Capricious
     private
     def next_value
       sum = 0.0
-      @shape.times { sum += @expo.next; puts sum }
+      @shape.times { sum += @expo.next }
       sum
     end
   end
