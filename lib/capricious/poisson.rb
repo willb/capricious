@@ -22,11 +22,16 @@ module Capricious
   class Poisson
     include PRNG
     
-    attr_reader :z
+    attr_reader :z, :expected_mean
     
     def initialize(l, seed=nil, policy=MWC5, keep_stats=false)
       @z = Math.exp(-l)
+      @expected_mean = l
       prng_initialize(seed, policy, keep_stats)
+    end
+    
+    def expected_variance
+      @expected_mean
     end
     
     private
