@@ -1,4 +1,4 @@
-# capricious:  random number generators for Ruby
+# capricious/exponential.rb:  Exponential distribution PRNG, with selectable source-randomness policy
 #
 # Copyright (c) 2010 Red Hat, Inc.
 #
@@ -16,10 +16,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'capricious/lfsr'
-require 'capricious/mwc5'
-require 'capricious/sample_sink'
-require 'capricious/uniform'
-require 'capricious/biased_uniform'
-require 'capricious/poisson'
-require 'capricious/exponential'
+require 'capricious/generic_prng'
+
+module Capricious
+  class Exponential
+    include PRNG
+    
+    attr_reader :expected_mean, :expected_variance
+    
+    def initialize(l, seed=nil, policy=MWC5, keep_stats=false)
+      @expected_mean = 1 / l.to_f
+      @expected_variance = 1 / (l * l).to_f 
+      prng_initialize(seed, policy, keep_stats)
+    end
+    
+    private
+    def next_value
+      u = @prng.next_f
+      while u == 0.0 || u == 1.0
+        u = @prng.next_f
+      end
+
+      -expected_mean * Math.log(u)
+    end
+  end
+end
