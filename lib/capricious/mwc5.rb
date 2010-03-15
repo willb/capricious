@@ -59,12 +59,9 @@ module Capricious
     def shift_ks
       # XXX:  this is ugly, but it has to be to avoid coercing things into bignums
       t=(@x^(@x>>7)) & 0xffffffff
-      @x=@y
-      @y=@z
-      @z=@w
-      @w=@v
-      @v=(@v^(@v<<6))^(t^(t<<13)) & 0xffffffff
-      yy = ((@y & 0x7fffffff << 1) + 1) & 0xffffffff
+      @x,@y,@z,@w = @y,@z,@w,@v
+      @v=(@v^((@v&0x3ffffff)<<6))^(t^((t&0x1ffff)<<13)) & 0xffffffff
+      yy = (((@y & 0x7fffffff) << 1) + 1) & 0xffffffff
       (yy * @v) & 0xffffffff;
     end
   end
