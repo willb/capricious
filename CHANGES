@@ -1,9 +1,18 @@
-version 0.1.0
+version 0.2.0
+
+* Improved documentation.
+* Added Erlang distribution.
+* Added exponential distribution.
+* Added #expected_mean and #expected_variance methods to all distribution simulators.
+* Added biased uniform distribution (i.e. uniform distributions with ranges other than 0..1).
+* Substantial speed improvements to MWC generator.
+
+version 0.1.0 (369ba2f9eb0b921b24efa5b75aa34478d0a443af)
 
 * added multiply-with-carry based PRNG (algorithm due to George Marsaglia)
 * added Poisson distribution
 
-version 0.0.2 
+version 0.0.2 (8d28e1f4065ba8cc249722f2b4b4add091cb9dfb)
 
 * initial release
 * linear-feedback shift register based PRNG
