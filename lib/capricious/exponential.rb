@@ -1,8 +1,8 @@
 # capricious/exponential.rb:  Exponential distribution PRNG, with selectable source-randomness policy
 #
-# Copyright (c) 2010 Red Hat, Inc.
-#
-# Author:  William Benton <willb@redhat.com>
+# Copyright:: Copyright (c) 2010 Red Hat, Inc.
+# Author::  William Benton <willb@redhat.com>
+# License:: http://www.apache.org/licenses/LICENSE-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,11 +19,14 @@
 require 'capricious/generic_prng'
 
 module Capricious
+  # Exponential-distribution PRNG
   class Exponential
     include PRNG
     
     attr_reader :expected_mean, :expected_variance
     
+    # Initializes a new distribution.  =l= is the lambda parameter; =seed=,
+    # =policy=, and =keep_stats= are as in =PRNG=.
     def initialize(l, seed=nil, policy=MWC5, keep_stats=false)
       @expected_mean = 1 / l.to_f
       @expected_variance = 1 / (l * l).to_f 

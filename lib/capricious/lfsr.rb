@@ -1,8 +1,8 @@
 # capricious/lfsr.rb:  linear-feedback shift register class
 #
-# Copyright (c) 2010 Red Hat, Inc.
-#
-# Author:  William Benton <willb@redhat.com>
+# Copyright:: Copyright (c) 2010 Red Hat, Inc.
+# Author::  William Benton <willb@redhat.com>
+# License:: http://www.apache.org/licenses/LICENSE-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -66,7 +66,6 @@ module Capricious
   module SixtyFourBitShifter
     MASK = 0xffffffffffffffff
     SIZE = 64
-#    BITS = [64,63,61,60]
     BITS = [64,4,3,1]
     BITSELECT = BITS.map {|bit| "@reg[#{SIZE-bit}]"}.join("^")
     

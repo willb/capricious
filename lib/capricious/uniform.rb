@@ -1,8 +1,8 @@
 # capricious/uniform.rb:  uniform-distribution PRNG, with selectable source-randomness policy
 #
-# Copyright (c) 2010 Red Hat, Inc.
-#
-# Author:  William Benton <willb@redhat.com>
+# Copyright:: Copyright (c) 2010 Red Hat, Inc.
+# Author::  William Benton <willb@redhat.com>
+# License:: http://www.apache.org/licenses/LICENSE-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,15 +19,19 @@
 require 'capricious/generic_prng'
 
 module Capricious
+  
+  # Creates pseudorandom numbers in the range [0,1) that satisfy a uniform distribution.
   class Uniform
     include PRNG
     UNIFORM_MIN = 0.0
     UNIFORM_MAX = 1.0
     
+    # Returns the expected mean for this distribution:  =(min + max) / 2=.
     def expected_mean
       (min + max) / 2
     end
     
+    # Returns the expected variance for this distribution:  =(max - min) ** 2 / 12=.
     def expected_variance
       ((max - min) ** 2) / 12
     end

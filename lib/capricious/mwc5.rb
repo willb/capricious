@@ -1,8 +1,9 @@
 # capricious/mwc5.rb:  32-bit multiply-with-carry PRNG
 #
-# Copyright (c) 2010 Red Hat, Inc.
+# Copyright:: Copyright (c) 2010 Red Hat, Inc.
+# Author::  William Benton <willb@redhat.com>
+# License:: http://www.apache.org/licenses/LICENSE-2.0
 #
-# Author:  William Benton <willb@redhat.com>
 # Algorithm due to George Marsaglia:  http://groups.google.com/group/comp.lang.c/msg/e3c4ea1169e463ae
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +21,7 @@
 require 'capricious/lfsr'
 
 module Capricious
+  # Multiply-with-carry pseudorandom number generator.  Algorithm due to George Marsaglia.
   class MWC5
     attr_reader :seed, :seeds
     def MWC5.new_with_seed(seed)

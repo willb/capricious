@@ -1,8 +1,8 @@
 # capricious/sample_sink.rb:  sample aggregator
 #
-# Copyright (c) 2010 Red Hat, Inc.
-#
-# Author:  William Benton <willb@redhat.com>
+# Copyright:: Copyright (c) 2010 Red Hat, Inc.
+# Author::  William Benton <willb@redhat.com>
+# License:: http://www.apache.org/licenses/LICENSE-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 # limitations under the License.
 
 module Capricious
+  
+  # Records aggregate data about a stream of samples in constant space.
   class SampleSink
     
     attr_reader :min, :max, :count, :mean, :variance
@@ -30,17 +32,22 @@ module Capricious
       @sum_x2 = 0.0
     end
     
+    # Adds a sample and updates =min=, =max= and =count= as well as =mean=,
+    # and =variance= estimates.
     def put(sample)
       update_stats(sample)
       update_estimates(sample)
       nil
     end
     
+    # Adds a sample and updates =min=, =max= and =count= as well as =mean=,
+    # and =variance= estimates.
     def <<(sample)
       self.put(sample)
       self
     end
     
+    # Returns the square root of the variance for all witnessed samples.
     def stddev
       Math::sqrt(@variance)
     end

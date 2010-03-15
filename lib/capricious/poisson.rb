@@ -1,8 +1,8 @@
 # capricious/poisson.rb:  Poisson-distribution PRNG, with selectable source-randomness policy
 #
-# Copyright (c) 2010 Red Hat, Inc.
-#
-# Author:  William Benton <willb@redhat.com>
+# Copyright:: Copyright (c) 2010 Red Hat, Inc.
+# Author::  William Benton <willb@redhat.com>
+# License:: http://www.apache.org/licenses/LICENSE-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,11 +19,17 @@
 require 'capricious/generic_prng'
 
 module Capricious
+  # Models a Poisson distribution
   class Poisson
     include PRNG
     
     attr_reader :z, :expected_mean
     
+    # Initializes a new distribution.  =l= is the lambda parameter (which is
+    # also the expected mean and variance); =seed=, =policy=, and =keep_stats=
+    # are as in =PRNG=.  Note that the linear-feedback shift register policy
+    # will not provide acceptable results with this and other non-uniform
+    # distributions due to extremely high lag-k autocorrelation for small k.
     def initialize(l, seed=nil, policy=MWC5, keep_stats=false)
       @z = Math.exp(-l)
       @expected_mean = l

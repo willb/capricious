@@ -1,8 +1,8 @@
 # capricious/generic_prng.rb:  generic PRNG mixin with selectable source-randomness
 #
-# Copyright (c) 2010 Red Hat, Inc.
-#
-# Author:  William Benton <willb@redhat.com>
+# Copyright:: Copyright (c) 2010 Red Hat, Inc.
+# Author::  William Benton <willb@redhat.com>
+# License:: http://www.apache.org/licenses/LICENSE-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,8 +21,19 @@ require 'capricious/mwc5'
 require 'capricious/sample_sink'
 
 module Capricious
+  # Base mixin for distribution simulators.  Manages an underlying PRNG and
+  # optional statistics.  Mixing =PRNG= in to a simulator class will define
+  # =next= and =reset= methods as well as =@aggregate= and =@seed= attributes
+  # and a =@prng= instance variable.  Simulator classes must define a
+  # =next_value= method that returns a value in the given distribution and
+  # should define =expected_mean= and =expected_variance= methods or
+  # attributes.
   module PRNG
     
+    # Takes a seed, a policy, and whether or not to keep statistics in the
+    # =aggregate= attribute of the distribution object.  If a simulator class
+    # overrides =initialize=, it must call =prng_initialize= from within its
+    # =initialize= method.    
     def initialize(seed=nil, policy=MWC5, keep_stats=false)
       prng_initialize(seed, policy, keep_stats)
     end
@@ -33,12 +44,14 @@ module Capricious
       @aggregate = SampleSink.new if keep_stats
     end
     
+    # Returns the next value from this simulator.
     def next
       val = next_value
       @aggregate << val if @aggregate
       val
     end
 
+    # Resets the state of the underlying value.
     def reset(seed=nil)
       @prng.reset(seed)
       @aggregate = SampleSink.new if @aggregate
