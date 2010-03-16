@@ -1,4 +1,8 @@
-version 0.2.1
+version 0.2.2
+
+* Added Normal distribution
+
+version 0.2.1 (7e4db0b4f1ab5eaa784708c9678aefe1d0ad9f16)
 
 * 0.2.0 sneaked out the door with a stray debugging printf; this is a paper-bag release.
 
