@@ -1,10 +1,10 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 module Capricious
-  SAMPLE_COUNT = 20000
-
   describe Uniform do
-    def generate_samples(policy=MWC5, count=SAMPLE_COUNT)
+    U_SAMPLE_COUNT = 50000
+
+    def generate_samples(policy=MWC5, count=U_SAMPLE_COUNT)
       @uniform = Capricious::Uniform.new(nil, policy, true)
       count.times {@uniform.next}
     end
@@ -25,7 +25,7 @@ module Capricious
       it "should, given policy #{policy.name}, generate the same sequence given the same seed" do
         @uniform = Uniform.new(nil, policy, false)
         @uniform2 = Uniform.new(nil, policy, false)
-        (SAMPLE_COUNT/10).times { @uniform2.next.should == @uniform.next }
+        (U_SAMPLE_COUNT/1000).times { @uniform2.next.should == @uniform.next }
       end
     end
   end

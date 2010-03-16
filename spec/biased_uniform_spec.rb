@@ -1,13 +1,13 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 module Capricious
-  SAMPLE_COUNT = 60000
 
   describe BiasedUniform do
+    BU_SAMPLE_COUNT = 60000
     MIN = 13.37
     MAX = 14.53
     
-    def generate_samples(policy=MWC5, count=SAMPLE_COUNT)
+    def generate_samples(policy=MWC5, count=BU_SAMPLE_COUNT)
       @uniform = Capricious::BiasedUniform.new(MIN, MAX, nil, policy, true)
       count.times {@uniform.next}
     end
@@ -28,7 +28,7 @@ module Capricious
       it "should, given policy #{policy.name}, generate the same sequence given the same seed" do
         @uniform = BiasedUniform.new(MIN, MAX, nil, policy, false)
         @uniform2 = BiasedUniform.new(MIN, MAX, nil, policy, false)
-        (SAMPLE_COUNT/40).times { @uniform2.next.should == @uniform.next }
+        (BU_SAMPLE_COUNT/40).times { @uniform2.next.should == @uniform.next }
       end
     end
   end
