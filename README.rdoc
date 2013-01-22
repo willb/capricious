@@ -1,10 +1,12 @@
 = capricious
 
 Capricious is a library for pseudo-random number generation; it
-is primarily intended for use in simulation. Currently, one
-distribution (uniform) is provided over one underlying pseudo-
-random generator (a linear-feedback shift register), but in the 
-future Capricious will provide more of each.
+is primarily intended for use in simulation. Currently, several
+distributions (uniform, biased-uniform, Erlang, exponential, 
+normal, and Poisson) are provided over two underlying pseudo-
+random generators (a linear-feedback shift register and a 
+multiply-with-carry generator), but in the future Capricious 
+will provide more of each.
 
 == Copyright
 
