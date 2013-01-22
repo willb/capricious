@@ -15,7 +15,7 @@ module Capricious
       @erlang = Capricious::Erlang.new(ERL_LAMBDA, R, nil, MWC5, true)
     end
     
-    it "should generate distributed numbers in an Erlang distribution with lambda #{EXP_LAMBDA} and r #{R}, as judged by mean and variance estimates" do
+    it "should generate distributed numbers in an Erlang distribution with lambda #{ERL_LAMBDA} and r #{R}, as judged by mean and variance estimates" do
       generate_samples(10000)
       
       @erlang.aggregate.mean.should be_close(@erlang.expected_mean, 0.05)
