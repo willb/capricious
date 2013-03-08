@@ -267,11 +267,11 @@ module Capricious
 
     private
     def canonical(data)
+      # optimization: handle this fast case immediately
+      return [ data.to_f ] if data.class <= Numeric
       d = nil
       begin
         case
-          when data.class <= Numeric
-            d = [ data.to_f ]
           when data.class <= Array
             d = data
           else
@@ -286,7 +286,8 @@ module Capricious
 
     def enter(data)
       return if data.length <= 0
-      @data += data
+      # optimization: concat() is much, much faster than '+=' operator
+      @data.concat(data)
       dirty!
     end
 
