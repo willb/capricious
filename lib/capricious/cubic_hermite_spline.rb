@@ -21,11 +21,17 @@ module Capricious
   class CubicHermiteSpline
     # gradient methods, select with :gradient_method => <method> 
     FINITE_DIFFERENCE = 'finite_difference'
-    MONOTONIC = 'monotonic'
-    STRICT_MONOTONIC = 'strict_monotonic'
+    WEIGHTED_SECANT = 'weighted_secant'
+    SMOOTH = 'smooth'
+
     # these gradient methods not yet implemented
     CARDINAL = 'cardinal'
     CATMULL_ROM = 'catmull_rom'
+
+    # monotonic enforcement options
+    NONE = 'none'
+    NONSTRICT = 'nonstrict'
+    STRICT = 'strict'
 
     def initialize(args = {})
       reset
@@ -33,7 +39,7 @@ module Capricious
     end
 
     def reset
-      @args = { :data => nil, :gradient_method => FINITE_DIFFERENCE, :strict_domain => true, :monotonic_epsilon => 1e-6, :fixed_gradients => {}}
+      @args = { :data => nil, :gradient_method => FINITE_DIFFERENCE, :strict_domain => true, :monotonic => NONE, :monotonic_epsilon => 1e-6, :fixed_gradients => {}}
       clear
     end
 
@@ -133,16 +139,29 @@ module Capricious
       case @args[:gradient_method]
         when FINITE_DIFFERENCE
           finite_difference
-        when MONOTONIC
-          monotonic(false)
-        when STRICT_MONOTONIC
-          monotonic(true)
+        when WEIGHTED_SECANT
+          weighted_secant
+        when SMOOTH
+          smooth
         else
           raise ArgumentError, "unimplemented gradient method %s" % [@args[:gradient_method]]
       end
 
+      # fixed gradients override any computed gradients
       fg = @args[:fixed_gradients]
       0.upto(@m.length-1) { |j| @m[j] = fg[@x[j]] if fg.key?(@x[j]) }
+
+      # monotonic enforcement overrides any gradient values
+      case @args[:monotonic]
+        when NONE
+          nil
+        when NONSTRICT
+          monotonic_correction(false)
+        when STRICT
+          monotonic_correction(true)
+        else
+          raise ArgumentError, "unimplemented monotonic enforcement method %s" % [@args[:monotonic]]
+      end
 
       nil
     end
@@ -221,7 +240,9 @@ module Capricious
     end
 
 
-    def monotonic(strict)
+    def weighted_secant
+      # this is a tweak of the gradient initialization method
+      # described here:
       # http://en.wikipedia.org/wiki/Monotone_cubic_interpolation
       n = @x.length
       @m = Array.new(n, 0.0)
@@ -240,6 +261,69 @@ module Capricious
         h1 = @x[j]-@x[j-1]
         h = @x[j+1]-@x[j]
         @m[j] = (h*d[j-1] + h1*d[j])/(h1+h)
+      end
+    end
+
+
+    def smooth
+      # construct a tridiagonal matrix equation that embodies the
+      # constraint that 2nd derivatives are continuous at knot points
+      # (equivalently, 1st derivative is smooth across knots)
+      # and solve the system to get the 'm' vector values that satisfy
+      # the system
+      n = @x.length
+      fg = @args[:fixed_gradients]
+
+      # tridiagonal coefficients to be filled below
+      abc = []
+      d = []
+
+      # left endpoint
+      if fg.key?(@x[0]) then
+        # fixed gradient at left endpoint
+        abc << [0.0, 1.0, 0.0]
+        d << fg[@x[0]]
+      else
+        # default to natural spline:  y'' = 0
+        h0 = @x[1]-@x[0]
+        abc << [0.0, 4.0/h0, 2.0/h0]
+        d << 6.0*(@y[1] - @y[0])/(h0**2)
+      end
+
+      # interior knots
+      1.upto(n-2) do |j|
+        h0 = @x[j]-@x[j-1]
+        h1 = @x[j+1]-@x[j]
+        abc << [2.0/h0, 4.0/h0 + 4.0/h1, 2.0/h1]
+        d << 6.0*(@y[j+1]-@y[j])/(h1**2) + 6.0*(@y[j]-@y[j-1])/(h0**2)
+      end
+
+      # right endpoint
+      if fg.key?(@x[n-1]) then
+        # fixed gradient at left endpoint
+        abc << [0.0, 1.0, 0.0]
+        d << fg[@x[n-1]]
+      else
+        # default to natural spline:  y'' = 0
+        h1 = @x[n-1]-@x[n-2]
+        abc << [2.0/h1, 4.0/h1, 0.0]
+        d << 6.0*(@y[n-1] - @y[n-2])/(h1**2)
+      end
+
+      # now solve the system for our gradients
+      @m = solve_tridiagonal(abc, d)
+    end
+
+
+    def monotonic_correction(strict)
+      # corrects gradients to enforce monotonicity
+      # assumes 'm' vector is already initialized with gradients
+      # http://en.wikipedia.org/wiki/Monotone_cubic_interpolation
+      n = @x.length
+      d = Array.new(n-1, 0.0)
+
+      0.upto(n-2) do |j|
+        d[j] = (@y[j+1]-@y[j]) / (@x[j+1]-@x[j])
       end
 
       # avoid instability from dividing by very small numbers
@@ -276,6 +360,35 @@ module Capricious
         end
       end
     end
+
+
+    def solve_tridiagonal(abc, d)
+      # http://en.wikipedia.org/wiki/Tridiagonal_matrix_algorithm
+
+      # a is sub diagonal, a[j] defined for j = 1 to n-1
+      # b is main diagonal, b[j] defined for j = 0 to n-1
+      # c is super diagonal, c[j] defined for j = 0 to n-2
+      a,b,c = abc.clone.transpose
+      x = d.clone
+      n = x.length
+
+      c[0] /= b[0]
+      x[0] /= b[0]
+
+      1.upto(n-1) do |j|
+        z = 1.0 / (b[j] - a[j]*c[j-1])
+        c[j] *= z
+        x[j] = (x[j] - a[j]*x[j-1]) * z
+      end
+
+      (n-2).downto(0) do |j|
+        x[j] = x[j] - c[j]*x[j+1]
+      end
+
+      # return x as solution to tridiagonal equation
+      x
+    end
+
   end
 
 end
