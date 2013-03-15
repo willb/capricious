@@ -190,7 +190,7 @@ module Capricious
       raw.sort!
       scdf = sampled_cdf(raw)
 
-      @spline = Capricious::CubicHermiteSpline.new(:data => scdf, :gradient_method => CubicHermiteSpline::MONOTONIC)
+      @spline = Capricious::CubicHermiteSpline.new(:data => scdf, :gradient_method => CubicHermiteSpline::WEIGHTED_SECANT, :monotonic => CubicHermiteSpline::NONSTRICT)
 
       # if specific bounds were provided, insert them here
       gfix = {}
