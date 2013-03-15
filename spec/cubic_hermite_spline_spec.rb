@@ -39,6 +39,8 @@ module Capricious
         end
       end
 
+      # continuity of y'' is *not* guaranteed at knot points, for cubic hermite splines,
+      # but does hold internally on each interval
       ypp = s.qpp(x)
       [ 0.01, 0.001, 0.0001, 0.00001 ].each do |e|
         d = 0.01
@@ -57,19 +59,19 @@ module Capricious
       s = CubicHermiteSpline.new
 
       # default initial state
-      s.configuration.should == { :data => nil, :gradient_method => CubicHermiteSpline::FINITE_DIFFERENCE, :strict_domain => true, :monotonic_epsilon => 1e-6, :fixed_gradients => {}}
+      s.configuration.should == { :data => nil, :gradient_method => CubicHermiteSpline::FINITE_DIFFERENCE, :monotonic => CubicHermiteSpline::NONE, :strict_domain => true, :monotonic_epsilon => 1e-6, :fixed_gradients => {}}
       s.data.should == {}
       s.dirty?.should == true
 
       # configuration should not alter data (long as :data not given)
       s.configure(:strict_domain => false)
-      s.configuration.should == { :data => nil, :gradient_method => CubicHermiteSpline::FINITE_DIFFERENCE, :strict_domain => false, :monotonic_epsilon => 1e-6, :fixed_gradients => {}}
+      s.configuration.should == { :data => nil, :gradient_method => CubicHermiteSpline::FINITE_DIFFERENCE, :monotonic => CubicHermiteSpline::NONE, :strict_domain => false, :monotonic_epsilon => 1e-6, :fixed_gradients => {}}
       s.data.should == {}
       s.dirty?.should == true
 
       # adding data should show up, not alter config
       s << [1,1]
-      s.configuration.should == { :data => nil, :gradient_method => CubicHermiteSpline::FINITE_DIFFERENCE, :strict_domain => false, :monotonic_epsilon => 1e-6, :fixed_gradients => {}}
+      s.configuration.should == { :data => nil, :gradient_method => CubicHermiteSpline::FINITE_DIFFERENCE, :monotonic => CubicHermiteSpline::NONE, :strict_domain => false, :monotonic_epsilon => 1e-6, :fixed_gradients => {}}
       s.data.should == {1.0 => 1.0}
       s.dirty?.should == true
       
@@ -97,14 +99,14 @@ module Capricious
 
       # clear should remove data, but not change config
       s.clear
-      s.configuration.should == { :data => nil, :gradient_method => CubicHermiteSpline::FINITE_DIFFERENCE, :strict_domain => false, :monotonic_epsilon => 1e-6, :fixed_gradients => {}}
+      s.configuration.should == { :data => nil, :gradient_method => CubicHermiteSpline::FINITE_DIFFERENCE, :monotonic => CubicHermiteSpline::NONE, :strict_domain => false, :monotonic_epsilon => 1e-6, :fixed_gradients => {}}
       s.data.should == {}
       s.dirty?.should == true
 
       # reset clears data and resets config
       s << [9,9]
       s.reset
-      s.configuration.should == { :data => nil, :gradient_method => CubicHermiteSpline::FINITE_DIFFERENCE, :strict_domain => true, :monotonic_epsilon => 1e-6, :fixed_gradients => {}}
+      s.configuration.should == { :data => nil, :gradient_method => CubicHermiteSpline::FINITE_DIFFERENCE, :monotonic => CubicHermiteSpline::NONE, :strict_domain => true, :monotonic_epsilon => 1e-6, :fixed_gradients => {}}
       s.data.should == {}
       s.dirty?.should == true
     end
@@ -137,7 +139,7 @@ module Capricious
       # this dataset produces a non-monotonic spline with finite-difference gradients
       tricksy = [[0.1, 3], [0.2, 2.9], [0.3, 2.5], [0.4, 1], [0.5, 0.9], [0.6, 0.8], [0.7, 0.5], [0.8, 0.2], [0.9, 0.1]]
 
-      s = CubicHermiteSpline.new(:data => tricksy, :gradient_method => CubicHermiteSpline::STRICT_MONOTONIC)
+      s = CubicHermiteSpline.new(:data => tricksy, :gradient_method => CubicHermiteSpline::WEIGHTED_SECANT, :monotonic => CubicHermiteSpline::STRICT)
 
       0.upto(tricksy.length-1) do |j|
         x, y = tricksy[j]
@@ -165,7 +167,7 @@ module Capricious
       # this dataset produces a non-monotonic spline with finite-difference gradients
       tricksy = [[0.1, 0.1], [0.2, 0.2], [0.3, 0.5], [0.4, 0.8], [0.5, 0.9], [0.6, 1], [0.7, 2.5], [0.8, 2.9], [0.9, 3]]
 
-      s = CubicHermiteSpline.new(:data => tricksy, :gradient_method => CubicHermiteSpline::STRICT_MONOTONIC)
+      s = CubicHermiteSpline.new(:data => tricksy, :gradient_method => CubicHermiteSpline::WEIGHTED_SECANT, :monotonic => CubicHermiteSpline::STRICT)
 
       0.upto(tricksy.length-1) do |j|
         x, y = tricksy[j]
@@ -193,7 +195,7 @@ module Capricious
       # this dataset produces a non-monotonic spline with finite-difference gradients
       tricksy = [[0.1, 0.1], [0.2, 0.2], [0.3, 0.5], [0.4, 0.8], [0.5, 0.9], [0.6, 1], [0.7, 2.5], [0.8, 2.9], [0.9, 3]]
 
-      s = CubicHermiteSpline.new(:data => tricksy, :gradient_method => CubicHermiteSpline::MONOTONIC)
+      s = CubicHermiteSpline.new(:data => tricksy, :gradient_method => CubicHermiteSpline::WEIGHTED_SECANT, :monotonic => CubicHermiteSpline::NONSTRICT)
 
       0.upto(tricksy.length-1) do |j|
         x, y = tricksy[j]
@@ -218,7 +220,7 @@ module Capricious
     end
 
     it "should interpolate exponential function using monotonic" do
-      s = CubicHermiteSpline.new(:gradient_method => CubicHermiteSpline::STRICT_MONOTONIC)
+      s = CubicHermiteSpline.new(:gradient_method => CubicHermiteSpline::WEIGHTED_SECANT, :monotonic => CubicHermiteSpline::STRICT)
 
       # sample exp function over [-2, 2]
       n = 100
@@ -244,7 +246,7 @@ module Capricious
     end
 
     it "should interpolate exponential function using monotonic with fixed gradients" do
-      s = CubicHermiteSpline.new(:gradient_method => CubicHermiteSpline::STRICT_MONOTONIC)
+      s = CubicHermiteSpline.new(:gradient_method => CubicHermiteSpline::WEIGHTED_SECANT, :monotonic => CubicHermiteSpline::STRICT)
 
       # sample exp function over [-2, 2]
       n = 100
@@ -286,7 +288,7 @@ module Capricious
 
       s.domain.should == [s.x.first, s.x.last]
 
-      s.configure(:gradient_method => CubicHermiteSpline::MONOTONIC, :fixed_gradients => {s.x.first => 0.0, s.x.last => 0.0})
+      s.configure(:gradient_method => CubicHermiteSpline::WEIGHTED_SECANT, :monotonic => CubicHermiteSpline::NONSTRICT, :fixed_gradients => {s.x.first => 0.0, s.x.last => 0.0})
 
       # check the interpolated function and its derivatives
       [-1.5, -1.25, -1.0, -0.75, -0.5, -0.25, 0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5].each do |x|
@@ -320,7 +322,7 @@ module Capricious
 
       s.domain.should == [s.x.first, s.x.last]
 
-      s.configure(:gradient_method => CubicHermiteSpline::STRICT_MONOTONIC, :fixed_gradients => {s.x.first => 0.0, s.x.last => 0.0})
+      s.configure(:gradient_method => CubicHermiteSpline::WEIGHTED_SECANT, :monotonic => CubicHermiteSpline::STRICT, :fixed_gradients => {s.x.first => 0.0, s.x.last => 0.0})
 
       # check the interpolated function and its derivatives
       [-1.5, -1.25, -1.0, -0.75, -0.5, -0.25, 0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5].each do |x|
@@ -345,7 +347,7 @@ module Capricious
       data={-4.688791821788602=>3.999840006399744e-05, -1.6586371136261417=>0.0500379984800608, -1.3046562825563783=>0.1000359985600576, -1.0585991730429565=>0.1500339986400544, -0.8503819522760259=>0.2000319987200512, -0.6843423603976588=>0.250029998800048, -0.5343365012569704=>0.3000279988800448, -0.39296083510325713=>0.3500259989600416, -0.2624319742883667=>0.4000239990400384, -0.13325007586972948=>0.4500219991200352, -0.011579531102110765=>0.500019999200032, 0.12175742387365864=>0.5500179992800288, 0.2526208288094714=>0.6000159993600256, 0.38616795499830364=>0.6500139994400224, 0.5235683479504966=>0.7000119995200192, 0.6732220650984888=>0.750009999600016, 0.8452512292193505=>0.8000079996800128, 1.0444070020971699=>0.8500059997600096, 1.2843441198060288=>0.9000039998400065, 1.6543865091627852=>0.9500019999200032, 4.103609078585672=>0.999960001599936}
 
       s = CubicHermiteSpline.new
-      s.configure(:gradient_method => CubicHermiteSpline::STRICT_MONOTONIC)
+      s.configure(:gradient_method => CubicHermiteSpline::WEIGHTED_SECANT, :monotonic => CubicHermiteSpline::NONSTRICT)
       s << data
 
       lb, ub = s.domain
